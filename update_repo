@@ -1,0 +1,5 @@
+#!/bin/bash
+#git checkout -B alexdev
+git add .
+git commit -m "@asenges $(date +%F' '%T)"
+git push --set-upstream origin main
