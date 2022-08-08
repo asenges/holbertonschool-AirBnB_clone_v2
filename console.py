@@ -3,13 +3,14 @@
 import cmd
 import sys
 from models.base_model import BaseModel
-from models.__init__ import storage
+from models import storage
 from models.user import User
 from models.place import Place
 from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+from os import getenv
 
 
 class HBNBCommand(cmd.Cmd):
@@ -19,9 +20,9 @@ class HBNBCommand(cmd.Cmd):
     prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
 
     classes = {
-            'BaseModel': BaseModel, 'User': User, 'Place': Place,
-            'State': State, 'City': City, 'Amenity': Amenity,
-            'Review': Review
+               'BaseModel': BaseModel, 'User': User, 'Place': Place,
+               'State': State, 'City': City, 'Amenity': Amenity,
+               'Review': Review
               }
     dot_cmds = ['all', 'count', 'show', 'destroy', 'update']
     types = {
@@ -37,7 +38,6 @@ class HBNBCommand(cmd.Cmd):
 
     def precmd(self, line):
         """Reformat command line for advanced command syntax.
-
         Usage: <class name>.<command>([<id> [<*args> or <**kwargs>]])
         (Brackets denote optional fields in usage example.)
         """
@@ -66,6 +66,8 @@ class HBNBCommand(cmd.Cmd):
 
                 # isolate _id, stripping quotes
                 _id = pline[0].replace('\"', '')
+                if not _id:
+                    raise ValueError('missing argument: id')
                 # possible bug here:
                 # empty quotes register as empty _id when replaced
 
@@ -118,36 +120,34 @@ class HBNBCommand(cmd.Cmd):
         if not args:
             print("** class name missing **")
             return
-        arg_lis = args.split()
-        if arg_lis[0] not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-        key_lis = []
-        if len(arg_lis) > 1:
-            for arg in arg_lis[1:]:
-                values = arg.split('=', 1)
-                try:
-                    if values[1][0] == '"' and values[1][-1] == '"':
-                        out = [values[0], ' '.join(values[1][1:-1].split('_'))]
-                        key_lis.append(out)
-                        continue
-                    try:
-                        num = float(values[1])
-                        if '.' not in values[1]:
-                            num = int(values[1])
-                        out = [values[0], num]
-                        key_lis.append(out)
-                    except ValueError:
-                        continue
-                except IndexError:
-                    continue
-        new_instance = HBNBCommand.classes[arg_lis[0]]()
-        for opt in key_lis:
-            setattr(new_instance, opt[0], opt[1])
-        storage.new(new_instance)
+
+        arg_list = args.split()
+
+        new_obj = self.classes[arg_list[0]]()
+        print(new_obj.id)
+
+        for arg in arg_list[1:]:
+            data = arg.split('=')
+            key = data[0]
+            value = data[1]
+            # check for String
+            if value[0] == '"':
+                value = value.strip('"').replace('_', ' ')
+                value = str(value)
+            elif '.' in value:
+                value = float(value)
+            else:
+                value = int(value)
+
+            setattr(new_obj, key, value)
+        storage.new(new_obj)
+        storage.save()
+    """
+        new_instance = HBNBCommand.classes[args]()
+        storage.save()
         print(new_instance.id)
         storage.save()
-
+    """
     def help_create(self):
         """ Help information for the create method """
         print("Creates a class of any type")
@@ -228,12 +228,18 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
+
+            for key, value in storage.all(HBNBCommand.classes[args]).items():
+                if key.split('.')[0] == args:
+                    print_list.append(str(value))
+            """
             for k, v in storage._FileStorage__objects.items():
                 if k.split('.')[0] == args:
                     print_list.append(str(v))
+            """
         else:
-            for k, v in storage._FileStorage__objects.items():
-                print_list.append(str(v))
+            for key, value in storage.all().items():
+                print_list.append(str(value))
 
         print(print_list)
 
