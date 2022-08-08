@@ -2,9 +2,17 @@
 """
 Database storage for Airbnb clone v2
 """
+from models.base_model import BaseModel
+from models.base_model import Base
 from sqlalchemy import create_engine, MetaData
-from os import environ as env
+from os import getenv
 from sqlalchemy.orm import sessionmaker, scoped_session
+from models.user import User
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.place import Place
+from models.review import Review
 
 
 class DBStorage:
@@ -14,45 +22,35 @@ class DBStorage:
 
     def __init__(self):
         """  """
-        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(
-            env["HBNB_MYSQL_USER"],
-            env["HBNB_MYSQL_PWD"],
-            env["HBNB_MYSQL_HOST"],
-            env["HBNB_MYSQL_DB"]
-        ), pool_pre_ping=True)
-        if env.get("HBNB_ENV") == "test":
-            meta = MetaData(self.__engine)
-            meta.reflect()
-            meta.drop_all()
+        HBNB_MYSQL_USER = getenv('HBNB_MYSQL_USER')
+        HBNB_MYSQL_PWD = getenv('HBNB_MYSQL_PWD')
+        HBNB_MYSQL_HOST = getenv('HBNB_MYSQL_HOST')
+        HBNB_MYSQL_DB = getenv('HBNB_MYSQL_DB')
+        HBNB_ENV = getenv('HBNB_ENV')
+        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'
+                                      .format(HBNB_MYSQL_USER,
+                                              HBNB_MYSQL_PWD,
+                                              HBNB_MYSQL_HOST,
+                                              HBNB_MYSQL_DB),
+                                      pool_pre_ping=True)
+        if getenv("HBNB_ENV") == "test":
+            Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
         """  """
-        from models.base_model import BaseModel
-        from models.user import User
-        from models.place import Place
-        from models.state import State
-        from models.city import City
-        from models.amenity import Amenity
-        from models.review import Review
-        refs = {
-                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
-                    'State': State, 'City': City, 'Amenity': Amenity,
-                    'Review': Review
-        }
-        classes = []
         if cls is None:
-            classes.append(State)
-            classes.append(City)
+            objs_query = self.__session.query(State).all()
+            objs_query.extend(self.__session.query(City).all())
+            objs_query.extend(self.__session.query(User).all())
+            objs_query.extend(self.__session.query(Place).all())
+            objs_query.extend(self.__session.query(Review).all())
+            objs_query.extend(self.__session.query(Amenity).all())
         else:
-            classes.append(refs[cls])
-        out = {}
-        for clas in classes:
-            quer = self.__session.query(clas).all()
-            for obj in quer:
-                key = "{}.{}".format(obj.__class__.__name__, obj.id)
-                print("KEY IS: {}".format(key))
-                out[key] = obj
-        return out
+            if type(cls) == str
+                cls = eval(cls)
+            objs_query = self.__session.query(cls)
+        return {"{}.{}".format(type(objt).__name__, objt.id):
+                objt for objt in objs_query}
 
     def new(self, obj):
         """  """
@@ -69,15 +67,10 @@ class DBStorage:
 
     def reload(self):
         """  """
-        from models.base_model import Base
-        from models.user import User
-        from models.place import Place
-        from models.state import State
-        from models.city import City
-        from models.amenity import Amenity
-        from models.review import Review
-
         Base.metadata.create_all(self.__engine)
-        Session = scoped_session(
-                 sessionmaker(expire_on_commit=False, bind=self.__engine))
+        Session = scoped_session(sessionmaker(expire_on_commit=False,
+                                              bind=self.__engine))
         self.__session = Session()
+
+    def close(self):
+        self.__session.close()
