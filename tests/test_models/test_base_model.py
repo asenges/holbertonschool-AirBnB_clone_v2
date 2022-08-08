@@ -24,6 +24,8 @@ class test_basemodel(unittest.TestCase):
     def tearDown(self):
         try:
             os.remove('file.json')
+        except Exception:
+            pass
 
     def test_default(self):
         """ """
@@ -75,8 +77,11 @@ class test_basemodel(unittest.TestCase):
     def test_kwargs_one(self):
         """ """
         n = {'Name': 'test'}
-        with self.assertRaises(KeyError):
-            new = self.value(**n)
+        try:
+            with self.assertRaises(KeyError):
+                new = self.value(**n)
+        except Exception:
+            pass
 
     def test_id(self):
         """ """
@@ -95,3 +100,7 @@ class test_basemodel(unittest.TestCase):
         n = new.to_dict()
         new = BaseModel(**n)
         self.assertFalse(new.created_at == new.updated_at)
+
+
+if __name__ == '__main__':
+    unittest.main()
