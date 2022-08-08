@@ -24,8 +24,6 @@ class test_basemodel(unittest.TestCase):
     def tearDown(self):
         try:
             os.remove('file.json')
-        except Exception:
-            pass
 
     def test_default(self):
         """ """
@@ -80,8 +78,6 @@ class test_basemodel(unittest.TestCase):
         try:
             with self.assertRaises(KeyError):
                 new = self.value(**n)
-        except Exception:
-            pass
 
     def test_id(self):
         """ """
