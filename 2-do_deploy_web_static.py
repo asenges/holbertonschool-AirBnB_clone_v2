@@ -2,7 +2,7 @@
 """
 2. Deploy archive!
 """
-from fabric.api import put, run, env
+from fabric.api import *
 from os.path import exists
 env.hosts = ['54.224.105.134', '34.239.247.122']
 
