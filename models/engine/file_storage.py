@@ -68,6 +68,6 @@ class FileStorage:
             except Exception as Ex:
                 pass
 
-    def close(self):
-        """Calls reload method for deserializing the JSON file to objects"""
+     def close(self):
+        """call reload() method for deserializing the JSON file to objects"""
         self.reload()
