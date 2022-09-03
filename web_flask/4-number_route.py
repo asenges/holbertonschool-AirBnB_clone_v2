@@ -40,7 +40,7 @@ def pythoniscool(text='is cool'):
 
 
 @app.route('/number/<int:n>', strict_slashes=False)
-def imanumber(n):
+def isnumber(n):
     """
     Integer Endpoint
     """

@@ -40,7 +40,7 @@ def pythoniscool(text='is cool'):
 
 
 @app.route('/number/<int:n>', strict_slashes=False)
-def imanumber(n):
+def isnumber(n):
     """
     Integer Endpoint
     """
@@ -48,11 +48,11 @@ def imanumber(n):
 
 
 @app.route('/number_template/<int:n>', strict_slashes=False)
-def numbersandtemplates(n):
+def isnumberopentemplate(n):
     """
     If Integer displays HTML
     """
-    return number_template('5-number.html', n=n)
+    return render_template('5-number.html', n=n)
 
 
 if __name__ == '__main__':
