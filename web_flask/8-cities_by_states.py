@@ -8,13 +8,13 @@ from models import storage
 app = Flask(__name__)
 
 
-@app.route('/states_list', strict_slashes=False)
-def stateslist():
+@app.route('/cities_by_states', strict_slashes=False)
+def citiestates():
     """
     HTML
     """
-    states = sorted(list(storage.all("State").values()), key=lambda x: x.name)
-    return render_template('7-states_list.html', states=states)
+    states = storage.all("State").values()
+    return render_template('8-cities_by_states.html', states=states)
 
 
 @app.teardown_appcontext
