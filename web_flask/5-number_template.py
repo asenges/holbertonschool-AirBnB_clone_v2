@@ -52,7 +52,7 @@ def numbersandtemplates(n):
     """
     If Integer displays HTML
     """
-    return render_template('5-number.html', n=n)
+    return number_template('5-number.html', n=n)
 
 
 if __name__ == '__main__':
