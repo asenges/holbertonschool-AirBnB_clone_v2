@@ -56,16 +56,11 @@ def isnumberopentemplate(n):
 
 
 @app.route('/number_odd_or_even/<int:n>', strict_slashes=False)
-def isoddevennumberopentemplate(n):
+def isoddorevenopentemplate(n):
     """
     If Integer displays HTML
     """
-    if n % 2 == 0:
-        evenodd = 'even'
-    else:
-        evenodd = 'odd'
-    return render_template('6-number_odd_or_even.html', n=n,
-                           evenodd=evenodd)
+    return render_template('6-number_odd_or_even.html', n=n)
 
 
 if __name__ == '__main__':
